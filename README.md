@@ -1,18 +1,19 @@
 # Demo project for GCP SDK
 
 ## Components:
-- GCE
+
+### GCE
     - add PD
     - images
     - image group
     - Firewall
 
-- GCS
+### GCS
     - create
     - website
     - sync local folder
 
-- Cloud Router
+### Cloud Router
     - setup
     - certificate
     - https
