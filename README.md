@@ -1,6 +1,6 @@
-### Demo project for GCP SDK
+# Demo project for GCP SDK
 
-# Components:
+## Components:
 - GCE
     - add PD
     - images
