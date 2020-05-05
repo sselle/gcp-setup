@@ -3,15 +3,17 @@
 ## Components:
 
 ### GCE
+    - create SA
     - add PD
     - images
     - image group
     - Firewall
 
 ### GCS
+    - list all
     - create
-    - website
     - sync local folder
+    - compare checksum before upload
 
 ### Cloud Router
     - setup
