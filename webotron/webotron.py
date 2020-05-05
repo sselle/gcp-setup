@@ -1,18 +1,19 @@
-from google.cloud import storage
 import click
 
 from storage_manager import StorageManager
+from compute_manager import ComputeManager
 
 @click.group()
 def cli():
-    global storage_manager
-    storage_manager = StorageManager()
-
+    global storage, compute
+    storage = StorageManager()
+    compute = ComputeManager(project='dataiku-cluster', zone='us-central1-a')
 
 @cli.command('list-instances')
 def list_instances():
     """List all instances in current project"""
-    print('look at all my instances!')
+    for instance in compute.all_instances()['items']:
+        print(instance['name'])
 
 
 @cli.command('create-instance')
@@ -24,7 +25,7 @@ def create_instance():
 @cli.command('list-buckets')
 def list_buckets():
     """list all buckets in GCP project"""
-    for bucket in storage_manager.all_buckets():
+    for bucket in storage.all_buckets():
         print(bucket.name)
 
 
