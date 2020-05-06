@@ -16,12 +16,11 @@ def list_instances():
     for instance in compute.all_instances()['items']:
         print(instance['name'])
 
-
 @cli.command('create-instance')
 def create_instance():
     """create a new instance to run DSS"""
-    print('here we will create a new instance later')
-
+    compute.create_design_node( size = 'small', 
+                                service_account= 'default')
 
 @cli.command('list-buckets')
 def list_buckets():
