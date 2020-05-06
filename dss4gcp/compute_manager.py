@@ -25,18 +25,9 @@ class ComputeManager:
         return os_selector.get(os_flavour, 
                                 'Invalid OS flavour {}. Currently centos and devian are supported '.format(os_flavour))
 
-    
-    def create_design_node(self, 
-                            size='small', 
-                            service_account='default', 
-                            os_flavour='centos', 
-                            name='design-node'):
 
-        """Create GCE instance to run design node"""
-        image_response = self.get_image_for_os(os_flavour)
-        source_disk_image = image_response['selfLink']
-        machine_type = 'zones/{0}/machineTypes/{1}'.format(self.zone, size)
-
+    @staticmethod
+    def create_instance_config(name, machine_type, source_disk_image, service_account):
         config = {
             'name': name,
             'machineType': machine_type,
@@ -67,7 +58,24 @@ class ComputeManager:
                     'https://www.googleapis.com/auth/logging.write'
                 ]
             }],
-        }
+        } 
+        return config
+    
+    def create_design_node(self, 
+                            size='small', 
+                            service_account='default', 
+                            os_flavour='centos', 
+                            name='design-node'):
+
+        """Create GCE instance to run design node"""
+        image_response = self.get_image_for_os(os_flavour)
+        source_disk_image = image_response['selfLink']
+        machine_type = 'zones/{0}/machineTypes/{1}'.format(self.zone, size)
+       
+        config = self.create_instance_config(name=name, 
+                                            machine_type=machine_type, 
+                                            source_disk_image=source_disk_image, 
+                                            service_account=service_account)
 
         #start the instance
         try:
