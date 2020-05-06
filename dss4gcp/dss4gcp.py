@@ -17,10 +17,15 @@ def list_instances():
         print(instance['name'])
 
 @cli.command('create-instance')
-def create_instance():
+@click.argument('instance-name')
+@click.option('--os-flavour', default='centos', help='centos or debian')
+def create_instance(instance_name, os_flavour):
     """create a new instance to run DSS"""
     compute.create_design_node( size = 'small', 
-                                service_account= 'default')
+                                service_account= 'default',
+                                name=instance_name,
+                                os_flavour=os_flavour
+                                )
 
 @cli.command('list-buckets')
 def list_buckets():

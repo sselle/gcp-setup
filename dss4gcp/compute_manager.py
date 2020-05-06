@@ -8,14 +8,24 @@ class ComputeManager:
         self.project = project
         self.zone = zone
 
+
     def all_instances(self):
         """Return list of all instances"""
         return self.gce.instances().list(project=self.project, zone=self.zone).execute()
 
-    @staticmethod
-    def get_image_for_os(os_flavour):
-        pass
 
+    def get_image_for_os(self, os_flavour):
+        """Get image for selected os-falvour"""
+        os_selector = {
+            'centos': self.gce.images().getFromFamily(project='centos-cloud',
+                                                        family='centos-8').execute(),
+            'debian': self.gce.images().getFromFamily(project='debian-cloud',
+                                                        family='debian-9').execute()
+        }
+        return os_selector.get(os_flavour, 
+                                'Invalid OS flavour {}. Currently centos and devian are supported '.format(os_flavour))
+
+    
     def create_design_node(self, 
                             size='small', 
                             service_account='default', 
@@ -23,12 +33,7 @@ class ComputeManager:
                             name='design-node'):
 
         """Create GCE instance to run design node"""
-        # not implemented: instance size, os_flavour selection
-        # get latest image - CentOS static for now
-        image_response = self.gce.images().getFromFamily(
-            project='centos-cloud', 
-            family='centos-8').execute()
-        
+        image_response = self.get_image_for_os(os_flavour)
         source_disk_image = image_response['selfLink']
         machine_type = 'zones/{}/machineTypes/n1-standard-1'.format(self.zone)
 
@@ -71,5 +76,3 @@ class ComputeManager:
                                         body=config).execute()
         except HttpError as error:
             print(error)
-
-        print(image_response)
