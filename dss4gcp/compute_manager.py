@@ -35,7 +35,7 @@ class ComputeManager:
         """Create GCE instance to run design node"""
         image_response = self.get_image_for_os(os_flavour)
         source_disk_image = image_response['selfLink']
-        machine_type = 'zones/{}/machineTypes/n1-standard-1'.format(self.zone)
+        machine_type = 'zones/{0}/machineTypes/{1}'.format(self.zone, size)
 
         config = {
             'name': name,

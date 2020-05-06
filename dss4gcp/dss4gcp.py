@@ -19,9 +19,10 @@ def list_instances():
 @cli.command('create-instance')
 @click.argument('instance-name')
 @click.option('--os-flavour', default='centos', help='centos or debian')
-def create_instance(instance_name, os_flavour):
+@click.option('--machine-type', default='f1-micro', help='enter valid GCE machine type')
+def create_instance(instance_name, os_flavour, machine_type):
     """create a new instance to run DSS"""
-    compute.create_design_node( size = 'small', 
+    compute.create_design_node( size = machine_type, 
                                 service_account= 'default',
                                 name=instance_name,
                                 os_flavour=os_flavour
