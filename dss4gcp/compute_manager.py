@@ -1,5 +1,8 @@
+import os
+
 import googleapiclient.discovery
 from googleapiclient.errors import HttpError
+from google.oauth2 import service_account
 
 class ComputeManager:
     """Manages compute resources on GCP"""
@@ -26,8 +29,48 @@ class ComputeManager:
                                 'Invalid OS flavour {}. Currently centos and devian are supported '.format(os_flavour))
 
 
+    def all_service_accounts(self):
+        """List all service accounts in configured project"""
+        credentials = service_account.Credentials.from_service_account_file(
+            filename=os.environ['GOOGLE_APPLICATION_CREDENTIALS'],
+            scopes=['https://www.googleapis.com/auth/cloud-platform'])
+
+        service = googleapiclient.discovery.build(
+            'iam', 'v1', credentials=credentials)
+        
+        service_accounts = service.projects().serviceAccounts().list(
+        name='projects/' + self.project).execute()
+
+        for account in service_accounts['accounts']:
+            print('Name: ' + account['name'])
+            print('Email: ' + account['email'])
+            print(' ')
+        
+        return 'default'
+    
+    def create_service_account(self, sa_name):
+        """create service account with needed permissions to run DSS"""
+        #service-account-name@project-id.iam.gserviceaccount.com
+        credentials = service_account.Credentials.from_service_account_file(
+            filename=os.environ['GOOGLE_APPLICATION_CREDENTIALS'],
+            scopes=['https://www.googleapis.com/auth/cloud-platform'])
+
+        service = googleapiclient.discovery.build(
+            'iam', 'v1', credentials=credentials)
+        
+        service_accounts = service.projects().serviceAccounts().list(
+        name='projects/' + self.project).execute()
+
+        for account in service_accounts['accounts']:
+            print('Name: ' + account['name'])
+            print('Email: ' + account['email'])
+            print(' ')
+        
+        return 'default'
+
+
     @staticmethod
-    def create_instance_config(name, machine_type, source_disk_image, service_account):
+    def create_instance_config(name, machine_type, source_disk_image, sa_name):
         config = {
             'name': name,
             'machineType': machine_type,
@@ -52,7 +95,7 @@ class ComputeManager:
 
             # Allow the instance to access cloud storage and logging.
             'serviceAccounts': [{
-                'email': service_account,
+                'email': sa_name,
                 'scopes': [
                     'https://www.googleapis.com/auth/devstorage.read_write',
                     'https://www.googleapis.com/auth/logging.write'
@@ -63,7 +106,7 @@ class ComputeManager:
     
     def create_design_node(self, 
                             size='small', 
-                            service_account='default', 
+                            sa_name='default', 
                             os_flavour='centos', 
                             name='design-node'):
 
@@ -71,11 +114,12 @@ class ComputeManager:
         image_response = self.get_image_for_os(os_flavour)
         source_disk_image = image_response['selfLink']
         machine_type = 'zones/{0}/machineTypes/{1}'.format(self.zone, size)
+        sa_name = self.create_service_account(sa_name)
        
         config = self.create_instance_config(name=name, 
                                             machine_type=machine_type, 
                                             source_disk_image=source_disk_image, 
-                                            service_account=service_account)
+                                            sa_name=sa_name)
 
         #start the instance
         try:

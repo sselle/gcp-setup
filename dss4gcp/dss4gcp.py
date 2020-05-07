@@ -23,10 +23,14 @@ def list_instances():
 def create_instance(instance_name, os_flavour, machine_type):
     """create a new instance to run DSS"""
     compute.create_design_node( size = machine_type, 
-                                service_account= 'default',
+                                sa_name = 'default',
                                 name=instance_name,
                                 os_flavour=os_flavour
                                 )
+
+@cli.command('list-service-accounts')
+def list_service_accounts():
+    compute.all_service_accounts()
 
 @cli.command('list-buckets')
 def list_buckets():
