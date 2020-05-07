@@ -39,7 +39,7 @@ class ComputeManager:
             'iam', 'v1', credentials=credentials)
         
         service_accounts = service.projects().serviceAccounts().list(
-        name='projects/' + self.project).execute()
+            name='projects/' + self.project).execute()
 
         for account in service_accounts['accounts']:
             print('Name: ' + account['name'])
@@ -57,20 +57,22 @@ class ComputeManager:
 
         service = googleapiclient.discovery.build(
             'iam', 'v1', credentials=credentials)
-        
-        service_accounts = service.projects().serviceAccounts().list(
-        name='projects/' + self.project).execute()
+        #TRY CATCH einfügen für SA Erstellung
+        my_service_account = service.projects().serviceAccounts().create(
+        name='projects/' + self.project,
+        body={
+            'accountId': sa_name,
+            'serviceAccount': {
+                'displayName': 'SA for DSS design node'
+            }
+        }).execute()
 
-        for account in service_accounts['accounts']:
-            print('Name: ' + account['name'])
-            print('Email: ' + account['email'])
-            print(' ')
-        
-        return 'default'
+        print('Created service account: ' + my_service_account['email'])
+        return my_service_account
 
 
     @staticmethod
-    def create_instance_config(name, machine_type, source_disk_image, sa_name):
+    def create_instance_config(name, machine_type, source_disk_image, sa_email):
         config = {
             'name': name,
             'machineType': machine_type,
@@ -95,7 +97,7 @@ class ComputeManager:
 
             # Allow the instance to access cloud storage and logging.
             'serviceAccounts': [{
-                'email': sa_name,
+                'email': sa_email,
                 'scopes': [
                     'https://www.googleapis.com/auth/devstorage.read_write',
                     'https://www.googleapis.com/auth/logging.write'
@@ -106,7 +108,7 @@ class ComputeManager:
     
     def create_design_node(self, 
                             size='small', 
-                            sa_name='default', 
+                            sa_name='sa-design-node', 
                             os_flavour='centos', 
                             name='design-node'):
 
@@ -114,12 +116,12 @@ class ComputeManager:
         image_response = self.get_image_for_os(os_flavour)
         source_disk_image = image_response['selfLink']
         machine_type = 'zones/{0}/machineTypes/{1}'.format(self.zone, size)
-        sa_name = self.create_service_account(sa_name)
+        sa_email = self.create_service_account(sa_name)['email']
        
         config = self.create_instance_config(name=name, 
                                             machine_type=machine_type, 
                                             source_disk_image=source_disk_image, 
-                                            sa_name=sa_name)
+                                            sa_email=sa_email)
 
         #start the instance
         try:

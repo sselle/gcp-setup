@@ -23,7 +23,7 @@ def list_instances():
 def create_instance(instance_name, os_flavour, machine_type):
     """create a new instance to run DSS"""
     compute.create_design_node( size = machine_type, 
-                                sa_name = 'default',
+                                sa_name = 'sa-design-node',
                                 name=instance_name,
                                 os_flavour=os_flavour
                                 )
