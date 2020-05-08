@@ -46,6 +46,50 @@ class ServiceAccountManager:
         }).execute()
 
         print('Created service account: ' + sa_design_node['email'])
+
+        #Set the required permissions
+        policy = self.get_policy(credentials=credentials)
+        policy = self.modify_policy(policy=policy, 
+                                    sa_email=sa_design_node['email'])
+        self.set_policy(credentials=credentials,
+                        policy=policy)
         return sa_design_node
 
+
+    def get_policy(self, credentials):
+        """Get IAM policy for the project"""
+        service = googleapiclient.discovery.build(
+            "cloudresourcemanager", "v1", credentials=credentials)
+
+        policy = (
+            service.projects()
+            .getIamPolicy(
+                resource=self.project,
+                body={"options": {"requestedPolicyVersion": "1"}},
+            )
+            .execute()
+        )
+        return policy
+    
+
+    def modify_policy(self, policy, sa_email):
+        """Adds a new member to a role binding."""
+        # Add: required roles, if not exist
+        role = 'roles/compute.admin'
+        binding = next(b for b in policy["bindings"] if b["role"] == role)
+        binding["members"].append('serviceAccount:'+sa_email)
+        print(binding)
+        return policy
+
+
+    def set_policy(self, credentials, policy):
+        service = googleapiclient.discovery.build(
+            "cloudresourcemanager", "v1", credentials=credentials
+        )
+        # set new policy
+        policy = (
+            service.projects()
+            .setIamPolicy(resource=self.project, body={"policy": policy})
+            .execute()
+        )
 

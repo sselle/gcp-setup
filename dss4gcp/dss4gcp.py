@@ -12,6 +12,16 @@ def cli():
     compute = ComputeManager(project='dataiku-cluster', zone='us-central1-a')
     service_accounts = ServiceAccountManager(project='dataiku-cluster')
 
+@cli.command('init')
+def init():
+    """"Initalize script to run the commands"""
+    #ToDo:
+    # - add env for local key
+    # - check, if all APIs can be used
+    # - remove fixed var for zone 
+    # - add env for prefered project
+    #
+
 @cli.command('list-instances')
 def list_instances():
     """List all instances in current project."""
@@ -34,6 +44,7 @@ def create_instance(instance_name, os_flavour, machine_type, sa_name):
 @cli.command('list-service-accounts')
 def list_service_accounts():
     service_accounts.all_service_accounts()
+
 
 @cli.command('list-buckets')
 def list_buckets():
